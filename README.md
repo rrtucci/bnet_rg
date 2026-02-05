@@ -1,1 +1,1 @@
-# Bnet_RG (Bayesian Network Renormalization Group)
+# bnet_rg (Bayesian Network Renormalization Group)
