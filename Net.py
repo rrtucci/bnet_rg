@@ -1,5 +1,6 @@
 import itertools
 import numpy as np
+from plotting import *
 
 from Cond_Prob import *
 from Node import *
@@ -41,17 +42,17 @@ class Net:
         for row in range(1, DGRAPH_NUM_ROWS):
             for col in range(1, DGRAPH_NUM_COLS):
                 nd_id += 1
-                y_nd = self.get_nd_from_id(nd_id, "Y")
+                y_nd = self.y_nodes[nd_id-1]
                 prob_m = 0
                 prob_p = 0
                 num_nearest_nei = len(y_nd.nearest_nei)
                 prob_nearest_nei = (0.5) ** num_nearest_nei
-                for nearest_nei_state in itertools.product(
+                for nearest_nei_states in itertools.product(
                         [-1, 1], repeat=num_nearest_nei):
                     for x_spin in [-1, 1]:
                         cond_prob_m, cond_prob_p, zz = \
                             self.cpt.calc_cond_probs_y_if_abcd_x(
-                                nearest_nei_state, x_spin)
+                                nearest_nei_states, x_spin)
                         prob_m += cond_prob_m * prob_nearest_nei * 0.5
                         prob_p += cond_prob_p * prob_nearest_nei * 0.5
                 y_nd.probs = [prob_m, prob_p]
@@ -63,27 +64,41 @@ class Net:
             for col in range(1, DGRAPH_NUM_COLS):
                 nd_id += 1
                 y_nd = self.get_nd_from_id(nd_id, "Y")
-                prob_m = 0
-                prob_p = 0
                 mutual_info = 0
                 num_nearest_nei = len(y_nd.nearest_nei)
                 prob_nearest_nei = (0.5) ** num_nearest_nei
                 for nearest_nei_state in itertools.product(
-                        [-1, 1], repeat=num_nearest_nei + 1):
+                        [-1, 1], repeat=num_nearest_nei):
                     for x_spin in [-1, 1]:
                         cond_prob_m, cond_prob_p, zz = \
                             self.cpt.calc_cond_probs_y_if_abcd_x(
                                 nearest_nei_state, x_spin)
-                        prob_m += cond_prob_m * prob_nearest_nei * 0.5
-                        prob_p += cond_prob_p * prob_nearest_nei * 0.5
-                        mutual_info += prob_m * np.log(
+                        joint_prob_m = cond_prob_m * prob_nearest_nei * 0.5
+                        joint_prob_p = cond_prob_p * prob_nearest_nei * 0.5
+                        mutual_info += joint_prob_m * np.log(
                             cond_prob_m / y_nd.probs[0])
-                        mutual_info += prob_p * np.log(
+                        mutual_info += joint_prob_p * np.log(
                             cond_prob_p / y_nd.probs[1])
                 y_nd.mutual_info = mutual_info
 
+    def write_dot_file(self, fname):
+        with open(fname, "w") as f:
+            str0 = "digraph G {\n"
+            for nd_id in range(1, NUM_DNODES+1):
+                y_nd = self.y_nodes[nd_id-1]
+                for nn  in y_nd.nearest_nei:
+                    color = efficiency_to_hex(y_nd.get_efficiency())
+                    str0 += (f'S{nn}->S{nd_id} [color="{color}"];\n')
+                spin = y_nd.sample()
+                #print("xdc", nd_id, ".", spin)
+                if spin == -1:
+                    str0 += (f"S{nd_id}[style=filled,fillcolor=black,"
+                             f"fontcolor=white];\n")
+            str0 += "}"
+            f.write(str0)
+
 if __name__ == "__main__":
-    def main():
+    def main1():
         net = Net(beta=1, g=.2, h=.3)
         for i in range(7):
             print("*******x_nodes[i]:")
@@ -92,4 +107,17 @@ if __name__ == "__main__":
         for i in range(7):
             print("*******y_nodes[i]:")
             net.y_nodes[i].describe_self()
-    main()
+    def main2(do_plot):
+        net = Net(beta=1, g=.2, h=.3)
+        dot_file = "test.txt"
+        net.write_dot_file(dot_file)
+        if do_plot:
+            plot_dot_with_colorbar(
+                dot_file,
+                cmap_name="viridis",
+                vmin=0.0,
+                vmax=1.0,
+                colorbar_label="Efficiency"
+            )
+    #main1()
+    main2(True)
