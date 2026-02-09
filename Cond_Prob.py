@@ -1,22 +1,38 @@
 import numpy as np
 
+
 class Cond_Prob:
-    def _init_(self, beta, g, h, lam):
+    def __init__(self, beta, g, h):
         self.beta = beta
-        self.g= g9
-        self.h = h8
-        self.lam = lam
+        self.g = g
+        self.h = h
 
     def calc_cond_probs_y_if_abcd_x(self, abcd_state, x_state):
+        assert set(abcd_state) == set([-1, 1])
+        assert x_state in [-1, 1]
         abcd_sum = np.sum(abcd_state)
-        energy_plus = self.g*abcd_sum/2 + self.h -self.lam*(1-x_state)
-        energy_minus = -self.g*abcd_sum/2 - self.h-self.lam(-1, - x_state)
-        zz = energy_plus + energy_minus
-        cond_prob_m = np.exp(-self.beta*energy_minus)/zz
-        cond_prob_p = np.exp(-self.beta*energy_plus)/zz
+        energy_plus = self.g * abcd_sum / 2 + self.h
+        energy_minus = -self.g * abcd_sum / 2 - self.h
+        # print("energy", energy_plus, energy_minus)
+        energy_plus *= self.beta
+        energy_minus *= self.beta
+        if x_state != 1:
+            cond_prob_p = 0
+        else:
+            cond_prob_p = np.exp(-energy_plus)
+        if x_state != -1:
+            cond_prob_m = 0
+        else:
+            cond_prob_m = np.exp(-energy_minus)
+        # print("cp", cond_prob_m, cond_prob_p)
+        zz = cond_prob_m + cond_prob_p
+        cond_prob_m /= zz
+        cond_prob_p /= zz
         return [cond_prob_m, cond_prob_p, zz]
 
 
-
-
-
+if __name__ == "__main__":
+    def main():
+        cpt = Cond_Prob(beta=1.0, g=.3, h=.2)
+        print(cpt.calc_cond_probs_y_if_abcd_x([1, 1, -1, -1], -1))
+    main()
