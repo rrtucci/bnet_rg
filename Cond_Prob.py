@@ -8,7 +8,8 @@ class Cond_Prob:
         self.h = h
 
     def calc_cond_probs_y_if_abcd_x(self, abcd_state, x_state):
-        assert set(abcd_state) == set([-1, 1])
+        assert set(abcd_state).issubset(set([-1, 1])),\
+            str(abcd_state) + " is illegal"
         assert x_state in [-1, 1]
         abcd_sum = np.sum(abcd_state)
         energy_plus = self.g * abcd_sum / 2 + self.h
@@ -17,11 +18,11 @@ class Cond_Prob:
         energy_plus *= self.beta
         energy_minus *= self.beta
         if x_state != 1:
-            cond_prob_p = 0
+            cond_prob_p = 1e-4
         else:
             cond_prob_p = np.exp(-energy_plus)
         if x_state != -1:
-            cond_prob_m = 0
+            cond_prob_m = 1e-4
         else:
             cond_prob_m = np.exp(-energy_minus)
         # print("cp", cond_prob_m, cond_prob_p)

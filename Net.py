@@ -24,27 +24,15 @@ class Net:
             return self.y_nodes[id_num - 1]
         assert None, "this node type does not exist"
 
+
+
     def create_nodes(self):
         nd_id = 0
         for row in range(1, DGRAPH_NUM_ROWS + 1):
             for col in range(1, DGRAPH_NUM_COLS + 1):
                 nd_id += 1
-                row_res = row % DGRAPH_NUM_ROWS
-                col_res = col % DGRAPH_NUM_ROWS
-                if row_res == 1 and col_res == 1:
-                    nearest_nei = [nd_id + 1, nd_id + DGRAPH_NUM_COLS]
-                elif row_res == 1 and col_res == 0:
-                    nearest_nei = [nd_id - 1, nd_id + DGRAPH_NUM_COLS]
-                elif row_res == 0 and col_res == 1:
-                    nearest_nei = [nd_id + 1, nd_id - DGRAPH_NUM_COLS]
-                elif row_res == 0 and col_res == 0:
-                    nearest_nei = [nd_id - 1, nd_id - DGRAPH_NUM_COLS]
-                else:
-                    nearest_nei = [nd_id + 1, nd_id - 1,
-                                   nd_id + DGRAPH_NUM_COLS,
-                                   nd_id - DGRAPH_NUM_COLS]
-                x_node = Node(nd_id, "X", nearest_nei)
-                y_node = Node(nd_id, "Y", nearest_nei)
+                x_node = Node(nd_id, "X")
+                y_node = Node(nd_id, "Y")
                 self.x_nodes.append(x_node)
                 self.y_nodes.append(y_node)
 
@@ -56,7 +44,7 @@ class Net:
                 y_nd = self.get_nd_from_id(nd_id, "Y")
                 prob_m = 0
                 prob_p = 0
-                num_nearest_nei = len(y_nd.nearest_nei_id_nums)
+                num_nearest_nei = len(y_nd.nearest_nei)
                 prob_nearest_nei = (0.5) ** num_nearest_nei
                 for nearest_nei_state in itertools.product(
                         [-1, 1], repeat=num_nearest_nei):
@@ -78,7 +66,7 @@ class Net:
                 prob_m = 0
                 prob_p = 0
                 mutual_info = 0
-                num_nearest_nei = len(y_nd.nearest_nei_id_nums)
+                num_nearest_nei = len(y_nd.nearest_nei)
                 prob_nearest_nei = (0.5) ** num_nearest_nei
                 for nearest_nei_state in itertools.product(
                         [-1, 1], repeat=num_nearest_nei + 1):
@@ -97,8 +85,11 @@ class Net:
 if __name__ == "__main__":
     def main():
         net = Net(beta=1, g=.2, h=.3)
-        print("x_nodes[0]:")
-        net.x_nodes[0].describe_self()
-        print("y_nodes[0]:")
-        net.y_nodes[0].describe_self()
+        for i in range(7):
+            print("*******x_nodes[i]:")
+            net.x_nodes[i].describe_self()
+        print("---------------------")
+        for i in range(7):
+            print("*******y_nodes[i]:")
+            net.y_nodes[i].describe_self()
     main()
