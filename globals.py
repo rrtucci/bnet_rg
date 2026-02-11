@@ -1,3 +1,7 @@
+import numpy as np
+
 DGRAPH_NUM_COLS = 5
 DGRAPH_NUM_ROWS = 5
 NUM_DNODES = DGRAPH_NUM_COLS * DGRAPH_NUM_ROWS
+# print("BETA_JJ_CURIE=", (0.5)*np.log(1 + np.sqrt(2)))
+BETA_JJ_CURIE = 0.44068679350977147
