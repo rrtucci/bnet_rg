@@ -16,14 +16,15 @@ def plot_dot_with_colorbar(
     vmin=0.0,
     vmax=1.0,
     figsize=(8, 4),
-    colorbar_label="Efficiency"
+    colorbar_label="Efficiency",
+    engine="neato"
 ):
     with tempfile.TemporaryDirectory() as tmp:
         png_file = os.path.join(tmp, "graph.png")
 
         # Render DOT -> PNG
         subprocess.run(
-            ["neato", "-Tpng", dot_file, "-o", png_file],
+            [engine , "-Tpng", dot_file, "-o", png_file],
             check=True
         )
 

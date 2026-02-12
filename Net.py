@@ -1,5 +1,4 @@
 import itertools
-import numpy as np
 from plotting import *
 from math import prod
 
@@ -137,14 +136,7 @@ if __name__ == "__main__":
         if do_plot:
             caption = f"beta={beta:.3f}, jj={jj:.3f}, h={h:.3f}, " \
                       f"lam={lam:.3f}, num_iter={num_iter}, mag={net.mag:.3f}"
-            plot_dot_with_colorbar(
-                dot_file,
-                caption,
-                cmap_name="viridis",
-                vmin=0.0,
-                vmax=1.0,
-                colorbar_label="Efficiency"
-            )
+            plot_dot_with_colorbar(dot_file, caption)
 
 
     # main1()
