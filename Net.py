@@ -10,13 +10,16 @@ from utils import *
 
 
 class Net:
-    def __init__(self, beta, jj, h, lam):
+    def __init__(self, beta, jj, h, lam, num_iter=1):
         self.cpt = Cond_Prob(beta, jj, h, lam)
         self.x_nodes = []
         self.y_nodes = []
         self.create_nodes()
-        self.calc_y_node_probs()
-        self.mag = self.calc_mag()
+        for i in range(num_iter):
+            self.calc_y_node_params()
+            self.mag = self.calc_mag()
+            print(i, ", magnetization=", self.mag)
+            self.load_x_node_probs()
 
     def get_nd_from_id(self, id_num, type):
         assert id_num - 1 in range(NUM_DNODES)
@@ -36,7 +39,7 @@ class Net:
                 self.x_nodes.append(x_node)
                 self.y_nodes.append(y_node)
 
-    def calc_y_node_probs(self):
+    def calc_y_node_params(self):
         nd_id = 0
         for row in range(1, DGRAPH_NUM_ROWS):
             for col in range(1, DGRAPH_NUM_COLS):
@@ -66,20 +69,29 @@ class Net:
                                         x_nd_prob)
                         prob_m += joint_prob_m
                         prob_p += joint_prob_p
-                        mutual_info += joint_prob_m * np.log(
-                            cond_prob_m / y_nd.probs[0])
-                        mutual_info += joint_prob_p * np.log(
-                            cond_prob_p / y_nd.probs[1])
+                        mutual_info += joint_prob_m * np.log(cond_prob_m)
+                        mutual_info += joint_prob_p * np.log(cond_prob_p)
                 y_nd.probs = [prob_m, prob_p]
                 y_nd.entropy = coin_toss_entropy(prob_m)
+                mutual_info += y_nd.entropy
                 y_nd.mutual_info = mutual_info
+                y_nd.set_efficiency()
 
     def calc_mag(self):
         mag = 0
         for y_nd in self.y_nodes:
             mag += -y_nd.probs[0] + y_nd.probs[1]
-            print("mnk", y_nd.probs[0], y_nd.probs[1], mag)
+            # print("mnk", y_nd.probs[0], y_nd.probs[1], mag)
         return mag / NUM_DNODES
+
+    def load_x_node_probs(self):
+        nd_id = 0
+        for row in range(1, DGRAPH_NUM_ROWS):
+            for col in range(1, DGRAPH_NUM_COLS):
+                nd_id += 1
+                y_nd = self.get_nd_from_id(nd_id, "Y")
+                x_nd = self.get_nd_from_id(nd_id, "X")
+                x_nd.probs = y_nd.probs
 
     def write_dot_file(self, fname):
         with open(fname, "w") as f:
@@ -87,8 +99,10 @@ class Net:
             for nd_id in range(1, NUM_DNODES + 1):
                 y_nd = self.y_nodes[nd_id - 1]
                 for nn in y_nd.nearest_nei:
-                    color = efficiency_to_hex(y_nd.get_efficiency())
-                    str0 += f'S{nn}->S{nd_id} [color="{color}"];\n'
+                    color = efficiency_to_hex(y_nd.efficiency)
+                    label = f"{y_nd.efficiency:.2f}"
+                    str0 += f'S{nn}->S{nd_id} [color="{color}",' \
+                            f'label="{label}"];\n'
                 spin = y_nd.sample()
                 # print("xdc", nd_id, ".", spin)
                 if spin == -1:
@@ -111,21 +125,26 @@ if __name__ == "__main__":
 
 
     def main2(do_plot):
-        beta_jj = BETA_JJ_CURIE
-        beta = .01  # no beta dependance when h=0
-        jj = beta_jj / beta
-        net = Net(beta=beta, jj=jj, h=0, lam=4)
+        beta_jj = BETA_JJ_CURIE * 5
+        jj = 1  # no jj dependance when h=0
+        beta = beta_jj / jj
+        lam = jj * 3
+        h = 0
+        num_iter = 19
+        net = Net(beta=beta, jj=jj, h=h, lam=lam, num_iter=num_iter)
         dot_file = "test.txt"
         net.write_dot_file(dot_file)
         if do_plot:
+            caption = f"beta={beta:.3f}, jj={jj:.3f}, h={h:.3f}, " \
+                      f"lam={lam:.3f}, num_iter={num_iter}, mag={net.mag:.3f}"
             plot_dot_with_colorbar(
                 dot_file,
+                caption,
                 cmap_name="viridis",
                 vmin=0.0,
                 vmax=1.0,
                 colorbar_label="Efficiency"
             )
-        print("magnetization=", net.mag)
 
 
     # main1()

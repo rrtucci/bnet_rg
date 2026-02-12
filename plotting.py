@@ -11,6 +11,7 @@ from matplotlib.gridspec import GridSpec
 
 def plot_dot_with_colorbar(
     dot_file,
+    caption,
     cmap_name="viridis",
     vmin=0.0,
     vmax=1.0,
@@ -43,6 +44,13 @@ def plot_dot_with_colorbar(
             cax=ax_cbar
         )
         cbar.set_label(colorbar_label)
+        if caption is not None:
+            fig.text(
+                0.5, 0.01,
+                caption,
+                ha="center",
+                va="bottom"
+            )
 
         plt.tight_layout()
         plt.show()

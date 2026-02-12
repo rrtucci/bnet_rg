@@ -8,18 +8,19 @@ class Node:
         self.type = type
         assert type in ["X", "Y"]
         self.nearest_nei = self.get_nearest_nei()
-        self.probs = [.5, .5]
+        self.probs = [.4, .6]
         self.mutual_info = 0
         self.entropy = 1
+        self.efficiency = 0
 
     def describe_self(self):
         print("id_num=", self.id_num)
         print("type=", self.type)
         print("nearest neighbors=", self.nearest_nei)
-        print("probs=", [f"{num:.{3}f}" for num in self.probs])
-        print("mutual info=", f"{self.mutual_info:.{3}f}")
-        print("entropy=", f"{self.entropy:.{3}f}")
-        print("efficiency=", f"{self.get_efficiency():.{3}f}")
+        print("probs=", [f"{num:.3f}" for num in self.probs])
+        print("mutual info=", f"{self.mutual_info:.3f}")
+        print("entropy=", f"{self.entropy:.3f}")
+        print("efficiency=", f"{self.efficiency:.3f}")
 
     def get_nearest_nei(self):
         nearest_nei = [self.id_num + 1, self.id_num - 1,
@@ -37,8 +38,11 @@ class Node:
             nearest_nei.remove(self.id_num + 1)
         return nearest_nei
 
-    def get_efficiency(self):
-        return round(self.mutual_info / self.entropy, 4)
+    def set_efficiency(self):
+        if self.entropy <1e-9:
+            self.efficiency = 0.0
+        else:
+            self.efficiency = round(self.mutual_info / self.entropy, 4)
 
     def sample(self):
         return choices([-1, 1], self.probs)[0]
