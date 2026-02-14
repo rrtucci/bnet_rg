@@ -16,6 +16,7 @@ class Net:
         self.h = h
         self.lam = lam
         self.num_iter = num_iter
+        self.p0 =p0
         self.cpt = Cond_Prob(beta, jj, h, lam)
         self.x_nodes = []
         self.y_nodes = []
@@ -90,7 +91,7 @@ class Net:
                     mutual_info += joint_prob_p * np.log(cond_prob_p)
             y_nd.probs = [prob_m, prob_p]
             y_nd.entropy = coin_toss_entropy(prob_m)
-            if y_nd.entropy < 1e-6:
+            if y_nd.entropy < 1e-9:
                 y_nd.mutual_info  = 0
                 y_nd.efficiency= 0
             else:
@@ -142,10 +143,14 @@ class Net:
 
     def do_plot(self, dot_file):
         self.write_dot_file(dot_file)
-
+        if self.p0:
+            p0_str = f"{self.p0:.3f}"
+        else:
+            p0_str = "random"
         caption = f"beta={self.beta:.3f}, jj={self.jj:.3f}, h={self.h:.3f}, " \
                   f"lam={self.lam:.3f}, num_iter={self.num_iter}, "\
-                   f"mag={self.mag:.3f}, av_eff={self.av_eff:.3f}"
+                   f"p0={p0_str}, mag={self.mag:.3f}, "\
+                    f"av_eff={self.av_eff:.3f}"
         plot_dot_with_colorbar(dot_file, caption)
 
 if __name__ == "__main__":
@@ -169,7 +174,7 @@ if __name__ == "__main__":
                   h=0,
                   lam=0,
                   num_iter=num_iter,
-                  p0=.2,
+                  p0=None,
                   do_reversing=False) #no change if do reversing
         net.do_plot("test.txt")
 
