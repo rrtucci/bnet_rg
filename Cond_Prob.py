@@ -13,10 +13,8 @@ class Cond_Prob:
             str(abcd_states) + " is illegal"
         assert x_state in [-1, 1]
         abcd_sum = np.sum(abcd_states)
-        energy_plus = -self.jj * abcd_sum - self.h - self.lam * (
-                    +1 - x_state) ** 2
-        energy_minus = self.jj * abcd_sum + self.h - self.lam * (
-                    -1 - x_state) ** 2
+        energy_plus = -self.jj * abcd_sum - self.h -self.lam * x_state
+        energy_minus = self.jj * abcd_sum + self.h + self.lam * x_state
         cond_prob_p = 1.0
         cond_prob_m = np.exp(-self.beta * (energy_minus - energy_plus))
 
@@ -29,7 +27,7 @@ class Cond_Prob:
 
 if __name__ == "__main__":
     def main():
-        cpt = Cond_Prob(beta=1.0, jj=0, h=0)
+        cpt = Cond_Prob(beta=1.0, jj=0, h=0, lam=1)
         print(cpt.calc_cond_probs_y_if_abcd_x([1, -1, -1, -1], -1))
 
 

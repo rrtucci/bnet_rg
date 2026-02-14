@@ -1,14 +1,16 @@
-from random import choices
+from random import choices, uniform
 from globals import *
 
 
 class Node:
-    def __init__(self, id_num, type):
+    def __init__(self, id_num, type, p0):
         self.id_num = id_num
         self.type = type
         assert type in ["X", "Y"]
         self.nearest_nei = self.get_nearest_nei()
-        self.probs = [.4, .6]
+        if p0<0 or p0>1:
+            p0 = uniform(0,1)
+        self.probs = [p0, 1-p0]
         self.mutual_info = 0
         self.entropy = 1
         self.efficiency = 0

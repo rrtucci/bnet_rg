@@ -9,11 +9,17 @@ from utils import *
 
 
 class Net:
-    def __init__(self, beta, jj, h, lam, num_iter=1, do_reversing=False):
+    def __init__(self, beta, jj, h=0, lam=0, num_iter=1, p0=.2,
+                 do_reversing=False):
+        self.beta = beta
+        self.jj  = jj
+        self.h = h
+        self.lam = lam
+        self.num_iter = num_iter
         self.cpt = Cond_Prob(beta, jj, h, lam)
         self.x_nodes = []
         self.y_nodes = []
-        self.create_nodes()
+        self.create_nodes(p0)
         for i in range(num_iter):
             if do_reversing:
                 reversed_sweep = bool(i%2)
@@ -21,7 +27,8 @@ class Net:
                 reversed_sweep = False
             self.calc_y_node_params(reversed_sweep)
             self.mag = self.calc_mag()
-            print(i, ", magnetization=", self.mag)
+            self.av_eff = self.calc_av_eff()
+            print(f"{i+1}, mag={self.mag:.5f}, av_eff={self.av_eff:.5f}")
             self.load_x_node_probs()
 
     def get_nd_from_id(self, id_num, type):
@@ -32,10 +39,10 @@ class Net:
             return self.y_nodes[id_num - 1]
         assert None, "this node type does not exist"
 
-    def create_nodes(self):
+    def create_nodes(self, p0):
         for nd_id in range(1, NUM_DNODES + 1):
-            x_node = Node(nd_id, "X")
-            y_node = Node(nd_id, "Y")
+            x_node = Node(nd_id, "X", p0)
+            y_node = Node(nd_id, "Y", p0)
             self.x_nodes.append(x_node)
             self.y_nodes.append(y_node)
 
@@ -56,9 +63,9 @@ class Net:
                                  nd_id in y_nd.nearest_nei]
             for nearest_nei_states in itertools.product(
                     [-1, 1], repeat=num_nearest_nei):
-                prob_nearest_nei = prod([nearest_nei_x_nds[i]. \
-                                        probs[(nearest_nei_states[
-                                                   i] + 1) // 2] for i in \
+                prob_nearest_nei = prod(
+                    [nearest_nei_x_nds[i].probs[
+                         (nearest_nei_states[i] + 1) // 2] for i in \
                                          range(num_nearest_nei)])
                 for x_spin in [-1, 1]:
                     x_nd_prob = x_nd.probs[(x_spin + 1) // 2]
@@ -71,13 +78,27 @@ class Net:
                                     x_nd_prob)
                     prob_m += joint_prob_m
                     prob_p += joint_prob_p
+                    # if nd_id == 12:
+                    #     print("----------")
+                    #     print("nearest, xspin", nearest_nei_states, x_spin)
+                    #     print("mjrt-minus", cond_prob_m, prob_nearest_nei,
+                    #           joint_prob_m, prob_m)
+                    #     print("mjrt-plus", cond_prob_p, prob_nearest_nei,
+                    #           joint_prob_p, prob_p)
+
                     mutual_info += joint_prob_m * np.log(cond_prob_m)
                     mutual_info += joint_prob_p * np.log(cond_prob_p)
             y_nd.probs = [prob_m, prob_p]
             y_nd.entropy = coin_toss_entropy(prob_m)
-            mutual_info += y_nd.entropy
-            y_nd.mutual_info = mutual_info
-            y_nd.set_efficiency()
+            if y_nd.entropy < 1e-6:
+                y_nd.mutual_info  = 0
+                y_nd.efficiency= 0
+            else:
+                mutual_info += y_nd.entropy
+                y_nd.mutual_info = mutual_info
+                y_nd.set_efficiency()
+            # print("mgbyt-mutual, entropy, eff", y_nd.mutual_info,
+            #       y_nd.entropy, y_nd.efficiency)
 
     def calc_mag(self):
         mag = 0
@@ -86,11 +107,20 @@ class Net:
             # print("mnk", y_nd.probs[0], y_nd.probs[1], mag)
         return mag / NUM_DNODES
 
+    def calc_av_eff(self):
+        av_eff = 0
+        for y_nd in self.y_nodes:
+            av_eff += y_nd.efficiency
+        return av_eff / NUM_DNODES
+
     def load_x_node_probs(self):
+        #print("mnk-----------------")
         for nd_id in range(1, NUM_DNODES + 1):
             y_nd = self.get_nd_from_id(nd_id, "Y")
             x_nd = self.get_nd_from_id(nd_id, "X")
+            #print("llkxcvm" , x_nd.probs, y_nd.probs)
             x_nd.probs = y_nd.probs
+
 
     def write_dot_file(self, fname):
         with open(fname, "w") as f:
@@ -110,6 +140,13 @@ class Net:
             str0 += "}"
             f.write(str0)
 
+    def do_plot(self, dot_file):
+        self.write_dot_file(dot_file)
+
+        caption = f"beta={self.beta:.3f}, jj={self.jj:.3f}, h={self.h:.3f}, " \
+                  f"lam={self.lam:.3f}, num_iter={self.num_iter}, "\
+                   f"mag={self.mag:.3f}, av_eff={self.av_eff:.3f}"
+        plot_dot_with_colorbar(dot_file, caption)
 
 if __name__ == "__main__":
     def main1():
@@ -122,22 +159,21 @@ if __name__ == "__main__":
             print("*******y_nodes[i]:")
             net.y_nodes[i].describe_self()
 
-
-    def main2(do_plot):
-        beta_jj = BETA_JJ_CURIE * 5
-        jj = 1  # no jj dependance when h=0
+    def main2():
+        beta_jj = BETA_JJ_CURIE * .5
+        jj = 1  # no jj dependence when h=0
         beta = beta_jj / jj
-        lam = jj * 3
-        h = 0
-        num_iter = 19
-        net = Net(beta=beta, jj=jj, h=h, lam=lam, num_iter=num_iter)
-        dot_file = "test.txt"
-        net.write_dot_file(dot_file)
-        if do_plot:
-            caption = f"beta={beta:.3f}, jj={jj:.3f}, h={h:.3f}, " \
-                      f"lam={lam:.3f}, num_iter={num_iter}, mag={net.mag:.3f}"
-            plot_dot_with_colorbar(dot_file, caption)
+        num_iter = 20
+        net = Net(beta=beta,
+                  jj=jj,
+                  h=0,
+                  lam=0,
+                  num_iter=num_iter,
+                  p0=.2,
+                  do_reversing=False) #no change if do reversing
+        net.do_plot("test.txt")
+
 
 
     # main1()
-    main2(True)
+    main2()
