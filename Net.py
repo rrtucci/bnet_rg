@@ -29,7 +29,11 @@ class Net:
             self.calc_y_node_params(reversed_sweep)
             self.mag = self.calc_mag()
             self.av_eff = self.calc_av_eff()
-            print(f"{i+1}, mag={self.mag:.5f}, av_eff={self.av_eff:.5f}")
+            if self.av_eff[1]:
+                av_eff_str = f"{self.av_eff[0]:.5f}"
+            else:
+                av_eff_str = "undef"
+            print(f"{i+1}, mag={self.mag:.5f}, av_eff={av_eff_str}")
             self.load_x_node_probs()
 
     def get_nd_from_id(self, id_num, type):
@@ -56,7 +60,7 @@ class Net:
             #print("lmjk", nd_id)
             y_nd = self.get_nd_from_id(nd_id, "Y")
             x_nd = self.get_nd_from_id(nd_id, "X")
-            mutual_info = 0
+            cond_info = 0
             prob_m = 0
             prob_p = 0
             num_nearest_nei = len(y_nd.nearest_nei)
@@ -87,17 +91,13 @@ class Net:
                     #     print("mjrt-plus", cond_prob_p, prob_nearest_nei,
                     #           joint_prob_p, prob_p)
 
-                    mutual_info += joint_prob_m * np.log(cond_prob_m)
-                    mutual_info += joint_prob_p * np.log(cond_prob_p)
+                    cond_info -= joint_prob_m * np.log(cond_prob_m)
+                    cond_info -= joint_prob_p * np.log(cond_prob_p)
             y_nd.probs = [prob_m, prob_p]
             y_nd.entropy = coin_toss_entropy(prob_m)
-            if y_nd.entropy < 1e-9:
-                y_nd.mutual_info  = 0
-                y_nd.efficiency= 0
-            else:
-                mutual_info += y_nd.entropy
-                y_nd.mutual_info = mutual_info
-                y_nd.set_efficiency()
+            y_nd.cond_info = cond_info
+            y_nd.mutual_info = y_nd.entropy - cond_info
+            y_nd.set_efficiency()
             # print("mgbyt-mutual, entropy, eff", y_nd.mutual_info,
             #       y_nd.entropy, y_nd.efficiency)
 
@@ -109,10 +109,20 @@ class Net:
         return mag / NUM_DNODES
 
     def calc_av_eff(self):
-        av_eff = 0
+        sum_eff = 0
+        num = 0
+        no_undef_eff = True
         for y_nd in self.y_nodes:
-            av_eff += y_nd.efficiency
-        return av_eff / NUM_DNODES
+            if y_nd.efficiency is not None:
+                sum_eff += y_nd.efficiency
+                num += 1
+            else:
+                no_undef_eff = False
+        if num:
+            av_eff = sum_eff/num
+        else:
+            av_eff = None
+        return av_eff, no_undef_eff
 
     def load_x_node_probs(self):
         #print("mnk-----------------")
@@ -129,10 +139,14 @@ class Net:
             for nd_id in range(1, NUM_DNODES + 1):
                 y_nd = self.y_nodes[nd_id - 1]
                 for nn in y_nd.nearest_nei:
-                    color = efficiency_to_hex(y_nd.efficiency)
-                    label = f"{y_nd.efficiency:.2f}"
-                    str0 += f'S{nn}->S{nd_id} [color="{color}",' \
-                            f'label="{label}"];\n'
+                    if y_nd.efficiency:
+                        color = efficiency_to_hex(y_nd.efficiency)
+                        label = f"{y_nd.efficiency:.2f}"
+                        str0 += f'S{nn}->S{nd_id} [color="{color}",' \
+                                f'label="{label}"];\n'
+                    else:
+                        str0 += f'S{nn}->S{nd_id} [style=dashed];\n'
+
                 spin = y_nd.sample()
                 # print("xdc", nd_id, ".", spin)
                 if spin == -1:
@@ -147,10 +161,13 @@ class Net:
             p0_str = f"{self.p0:.3f}"
         else:
             p0_str = "random"
+        if self.av_eff[1]:
+            av_eff_str = f"{self.av_eff[0]:.3f}"
+        else:
+            av_eff_str = "undefined"
         caption = f"beta={self.beta:.3f}, jj={self.jj:.3f}, h={self.h:.3f}, " \
                   f"lam={self.lam:.3f}, num_iter={self.num_iter}, "\
-                   f"p0={p0_str}, mag={self.mag:.3f}, "\
-                    f"av_eff={self.av_eff:.3f}"
+                   f"p0={p0_str}, mag={self.mag:.3f}, av_eff={av_eff_str}"
         plot_dot_with_colorbar(dot_file, caption)
 
 if __name__ == "__main__":
