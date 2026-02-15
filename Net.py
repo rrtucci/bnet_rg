@@ -9,21 +9,51 @@ from utils import *
 
 
 class Net:
-    def __init__(self, beta, jj, h=0, lam=0, num_iter=1, p0=.2,
-                 do_reversing=False):
+    """
+
+    Attributes
+    ----------
+    av_eff:
+    beta:
+    cpt:
+    h:
+    lam:
+    mag:
+    num_iter:
+    x_nodes:
+    y_nodes:
+
+
+
+
+    """
+    def __init__(self, beta, jj, h=0, lam=0,
+                 num_iter=1, p0=.2, do_reversing=False):
+        """
+
+        Parameters
+        ----------
+        beta
+        jj
+        h
+        lam
+        num_iter
+        p0
+        do_reversing
+        """
         self.beta = beta
-        self.jj  = jj
+        self.jj = jj
         self.h = h
         self.lam = lam
         self.num_iter = num_iter
-        self.p0 =p0
+        self.p0 = p0
         self.cpt = Cond_Prob(beta, jj, h, lam)
         self.x_nodes = []
         self.y_nodes = []
         self.create_nodes(p0)
         for i in range(num_iter):
             if do_reversing:
-                reversed_sweep = bool(i%2)
+                reversed_sweep = bool(i % 2)
             else:
                 reversed_sweep = False
             self.calc_y_node_params(reversed_sweep)
@@ -33,10 +63,21 @@ class Net:
                 av_eff_str = f"{self.av_eff[0]:.5f}"
             else:
                 av_eff_str = "undef"
-            print(f"{i+1}, mag={self.mag:.5f}, av_eff={av_eff_str}")
+            print(f"{i + 1}, mag={self.mag:.5f}, av_eff={av_eff_str}")
             self.load_x_node_probs()
 
     def get_nd_from_id(self, id_num, type):
+        """
+
+        Parameters
+        ----------
+        id_num
+        type
+
+        Returns
+        -------
+
+        """
         assert id_num - 1 in range(NUM_DNODES)
         if type == "X":
             return self.x_nodes[id_num - 1]
@@ -45,6 +86,16 @@ class Net:
         assert None, "this node type does not exist"
 
     def create_nodes(self, p0):
+        """
+
+        Parameters
+        ----------
+        p0
+
+        Returns
+        -------
+
+        """
         for nd_id in range(1, NUM_DNODES + 1):
             x_node = Node(nd_id, "X", p0)
             y_node = Node(nd_id, "Y", p0)
@@ -52,12 +103,22 @@ class Net:
             self.y_nodes.append(y_node)
 
     def calc_y_node_params(self, reversed_sweep=False):
+        """
+
+        Parameters
+        ----------
+        reversed_sweep
+
+        Returns
+        -------
+
+        """
         if not reversed_sweep:
-            id_range = range(1,NUM_DNODES+1)
+            id_range = range(1, NUM_DNODES + 1)
         else:
-            id_range = reversed(range(1,NUM_DNODES+1))
+            id_range = reversed(range(1, NUM_DNODES + 1))
         for nd_id in id_range:
-            #print("lmjk", nd_id)
+            # print("lmjk", nd_id)
             y_nd = self.get_nd_from_id(nd_id, "Y")
             x_nd = self.get_nd_from_id(nd_id, "X")
             cond_info = 0
@@ -71,7 +132,7 @@ class Net:
                 prob_nearest_nei = prod(
                     [nearest_nei_x_nds[i].probs[
                          (nearest_nei_states[i] + 1) // 2] for i in \
-                                         range(num_nearest_nei)])
+                     range(num_nearest_nei)])
                 for x_spin in [-1, 1]:
                     x_nd_prob = x_nd.probs[(x_spin + 1) // 2]
                     cond_prob_m, cond_prob_p, zz = \
@@ -102,6 +163,12 @@ class Net:
             #       y_nd.entropy, y_nd.efficiency)
 
     def get_mag(self):
+        """
+
+        Returns
+        -------
+
+        """
         mag = 0
         for y_nd in self.y_nodes:
             mag += -y_nd.probs[0] + y_nd.probs[1]
@@ -109,14 +176,26 @@ class Net:
         return mag / NUM_DNODES
 
     def get_av_entropy_and_cond_info(self):
-        sum_cond_info=0
+        """
+
+        Returns
+        -------
+
+        """
+        sum_cond_info = 0
         sum_ent = 0
         for y_nd in self.y_nodes:
             sum_cond_info += y_nd.cond_info
             sum_ent += y_nd.entropy
-        return sum_ent/NUM_DNODES, sum_cond_info/NUM_DNODES
+        return sum_ent / NUM_DNODES, sum_cond_info / NUM_DNODES
 
     def get_av_eff(self):
+        """
+
+        Returns
+        -------
+
+        """
         sum_eff = 0
         num = 0
         no_undef_eff = True
@@ -127,21 +206,36 @@ class Net:
             else:
                 no_undef_eff = False
         if num:
-            av_eff = sum_eff/num
+            av_eff = sum_eff / num
         else:
             av_eff = None
         return av_eff, no_undef_eff
 
     def load_x_node_probs(self):
-        #print("mnk-----------------")
+        """
+
+        Returns
+        -------
+
+        """
+        # print("mnk-----------------")
         for nd_id in range(1, NUM_DNODES + 1):
             y_nd = self.get_nd_from_id(nd_id, "Y")
             x_nd = self.get_nd_from_id(nd_id, "X")
-            #print("llkxcvm" , x_nd.probs, y_nd.probs)
+            # print("llkxcvm" , x_nd.probs, y_nd.probs)
             x_nd.probs = y_nd.probs
 
-
     def write_dot_file(self, fname):
+        """
+
+        Parameters
+        ----------
+        fname
+
+        Returns
+        -------
+
+        """
         with open(fname, "w") as f:
             str0 = "digraph G {\n"
             for nd_id in range(1, NUM_DNODES + 1):
@@ -164,6 +258,16 @@ class Net:
             f.write(str0)
 
     def plot_lattice(self, dot_file):
+        """
+
+        Parameters
+        ----------
+        dot_file
+
+        Returns
+        -------
+
+        """
         self.write_dot_file(dot_file)
         if self.p0:
             p0_str = f"{self.p0:.3f}"
@@ -174,9 +278,10 @@ class Net:
         else:
             av_eff_str = "undefined"
         caption = f"beta={self.beta:.3f}, jj={self.jj:.3f}, h={self.h:.3f}, " \
-                  f"lam={self.lam:.3f}, num_iter={self.num_iter}, "\
-                   f"p0={p0_str}, mag={self.mag:.3f}, av_eff={av_eff_str}"
+                  f"lam={self.lam:.3f}, num_iter={self.num_iter}, " \
+                  f"p0={p0_str}, mag={self.mag:.3f}, av_eff={av_eff_str}"
         plot_dot_with_colorbar(dot_file, caption)
+
 
 if __name__ == "__main__":
     def main1():
@@ -189,6 +294,7 @@ if __name__ == "__main__":
             print("*******y_nodes[i]:")
             net.y_nodes[i].describe_self()
 
+
     def main2():
         beta_jj = BETA_JJ_CURIE * .5
         jj = 1  # no jj dependence when h=0
@@ -200,9 +306,8 @@ if __name__ == "__main__":
                   lam=0,
                   num_iter=num_iter,
                   p0=None,
-                  do_reversing=False) #no change if do reversing
+                  do_reversing=False)  # no change if do reversing
         net.plot_lattice("test.txt")
-
 
 
     # main1()

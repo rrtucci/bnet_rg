@@ -9,22 +9,51 @@ import matplotlib.image as mpimg
 from matplotlib.gridspec import GridSpec
 
 
+def efficiency_to_hex(e, cmap_name="viridis"):
+    """
+    Map efficiency e in [0,1] to a hex color using a Matplotlib colormap.
+    Parameters
+    ----------
+    e:
+    cmap_name:
+    """
+    cmap = cm.get_cmap(cmap_name)
+    rgba = cmap(e)  # (r, jj, b, a) in [0,1]
+    return mcolors.to_hex(rgba)  # '#rrggbb'
+
+
 def plot_dot_with_colorbar(
-    dot_file,
-    caption,
-    cmap_name="viridis",
-    vmin=0.0,
-    vmax=1.0,
-    figsize=(8, 4),
-    colorbar_label="Efficiency",
-    engine="neato"
-):
+        dot_file,
+        caption,
+        cmap_name="viridis",
+        vmin=0.0,
+        vmax=1.0,
+        figsize=(8, 4),
+        colorbar_label="Efficiency",
+        engine="neato"):
+    """
+
+    Parameters
+    ----------
+    dot_file
+    caption
+    cmap_name
+    vmin
+    vmax
+    figsize
+    colorbar_label
+    engine
+
+    Returns
+    -------
+
+    """
     with tempfile.TemporaryDirectory() as tmp:
         png_file = os.path.join(tmp, "graph.png")
 
         # Render DOT -> PNG
         subprocess.run(
-            [engine , "-Tpng", dot_file, "-o", png_file],
+            [engine, "-Tpng", dot_file, "-o", png_file],
             check=True
         )
 
@@ -57,14 +86,17 @@ def plot_dot_with_colorbar(
         plt.show()
 
 
-import matplotlib.pyplot as plt
-
-import matplotlib.pyplot as plt
-
-import matplotlib.pyplot as plt
-
-
 def plot_parametric_curve(param_to_x_y):
+    """
+
+    Parameters
+    ----------
+    param_to_x_y
+
+    Returns
+    -------
+
+    """
     # Sort dictionary by parameter p0
     sorted_items = sorted(param_to_x_y.items())
 
@@ -121,4 +153,6 @@ if __name__ == "__main__":
         }
 
         plot_parametric_curve(param_to_x_y)
+
+
     main()

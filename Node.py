@@ -3,7 +3,30 @@ from globals import *
 
 
 class Node:
+    """
+
+    Attributes
+    ----------
+    cond_info:
+    efficiency:
+    entropy:
+    id_num:
+    mutual_info:
+    nearest_nei:
+    probs:
+    type:
+
+
+    """
     def __init__(self, id_num, type, p0=None):
+        """
+
+        Parameters
+        ----------
+        id_num
+        type
+        p0
+        """
         self.id_num = id_num
         self.type = type
         assert type in ["X", "Y"]
@@ -17,6 +40,12 @@ class Node:
         self.efficiency = None
 
     def describe_self(self):
+        """
+
+        Returns
+        -------
+
+        """
         print("id_num=", self.id_num)
         print("type=", self.type)
         print("nearest neighbors=", self.nearest_nei)
@@ -27,6 +56,12 @@ class Node:
         print(f"efficiency=  {self.efficiency}")
 
     def get_nearest_nei(self):
+        """
+
+        Returns
+        -------
+
+        """
         nearest_nei = [self.id_num + 1, self.id_num - 1,
                        self.id_num + DGRAPH_NUM_COLS,
                        self.id_num - DGRAPH_NUM_COLS]
@@ -43,12 +78,24 @@ class Node:
         return nearest_nei
 
     def set_efficiency(self):
+        """
+
+        Returns
+        -------
+
+        """
         if self.entropy <1e-9 and self.cond_info< 1e-9:
             self.efficiency = None
         else:
             self.efficiency = self.mutual_info / self.entropy
 
     def sample(self):
+        """
+
+        Returns
+        -------
+
+        """
         return choices([-1, 1], self.probs)[0]
 
 
