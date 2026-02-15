@@ -1,78 +1,102 @@
 import numpy as np
 class SIMPLE_INFO:
 
-    def __init__(self, prob_a_if_b, pb):
-        self.prob_a_if_b = prob_a_if_b
-        self.pb = pb
-        self.pa = self.get_pa()
+    def __init__(self, prob_y_if_x, px):
+        self.prob_y_if_x = prob_y_if_x
+        self.px = px
+        self.py = self.get_py()
 
 
-    def get_pa(self):
-        pa0 =0
-        pa1 = 0
-        for b in [0, 1]:
-            pa0 += self.prob_a_if_b[0, b]*self.pb[b]
-            pa1 += self.prob_a_if_b[1, b]*self.pb[b]
-        return [pa0, pa1]
+    def get_py(self):
+        py0 =0
+        py1 = 0
+        for x in [0, 1]:
+            py0 += self.prob_y_if_x[0, x]*self.px[x]
+            py1 += self.prob_y_if_x[1, x]*self.px[x]
+        return [py0, py1]
 
     def mutual_info(self):
         mi=0
-        for a in [0, 1]:
-            for b in [0,1]:
-                mi += self.prob_a_if_b[a, b]*self.pb[b]*\
-                    np.log(self.prob_a_if_b[a, b]/self.pa[a])
+        for y in [0, 1]:
+            for x in [0,1]:
+                mi += self.prob_y_if_x[y, x]*self.px[x]*\
+                    np.log(self.prob_y_if_x[y, x]/self.py[y])
         return mi
 
     @staticmethod
     def entropy_coin_toss(probs):
         ent = 0
-        for a in [0,1]:
-            ent += probs[a]*np.log(1/probs[a])
+        for y in [0,1]:
+            ent += probs[y]*np.log(1/probs[y])
         return ent
 
-    def cond_info_a_if_b(self):
+    def cond_info_y_if_x(self):
         ci=0
-        for a in [0, 1]:
-            for b in [0,1]:
-                ci -= self.prob_a_if_b[a, b]*self.pb[b]*\
-                      np.log(self.prob_a_if_b[a, b])
+        for y in [0, 1]:
+            for x in [0,1]:
+                ci -= self.prob_y_if_x[y, x]*self.px[x]*\
+                      np.log(self.prob_y_if_x[y, x])
         return ci
 
 
     def report(self):
         mi = self.mutual_info()
-        ent_a = SIMPLE_INFO.entropy_coin_toss(self.pa)
-        ent_b = SIMPLE_INFO.entropy_coin_toss(self.pb)
-        print(f"mi={mi:.4f}, ent_a={ent_a:.4f}, ent_b={ent_b:.4f}"
-              f", eff={mi/ent_a:.4f}")
+        ent_y = SIMPLE_INFO.entropy_coin_toss(self.py)
+        ent_x = SIMPLE_INFO.entropy_coin_toss(self.px)
+        cond_info = self.cond_info_y_if_x()
+        print("px=",f"[{self.px[0]:.3f}", f"{self.px[1]:.3f}]")
+        print(f"mi={mi:.4f}, ent_y={ent_y:.4f}, ent_x={ent_x:.4f}"
+              f", eff={mi/ent_y:.4f}")
+        print(f"ent_y={ent_y:.4f}, cond_info={cond_info:.4f}")
 
 if __name__ == "__main__":
-    def main():
-        zeroish = 1e-9
-        oneish = 1 - zeroish
-        pb = [.1, .9]
-
-        prob_a_if_b = np.array([[oneish, zeroish], [zeroish, oneish]])
-        simp = SIMPLE_INFO(prob_a_if_b, pb)
+    zeroish = 1e-9
+    oneish = 1 - zeroish
+    def main(px):
+        print("---------------------------------")
+        prob_y_if_x = np.array([[oneish, zeroish], [zeroish, oneish]])
+        simp = SIMPLE_INFO(prob_y_if_x, px)
         np.set_printoptions(precision=3)
-        print("prob_a_if_b=", prob_a_if_b)
+        print("prob_y_if_x=", prob_y_if_x)
         simp.report()
 
         print()
-        prob_a_if_b = np.array([[oneish, oneish], [zeroish, zeroish]])
-        simp = SIMPLE_INFO(prob_a_if_b, pb)
-        print("prob_a_if_b=", prob_a_if_b)
+        prob_y_if_x = np.array([[zeroish, oneish], [oneish, zeroish]])
+        simp = SIMPLE_INFO(prob_y_if_x, px)
+        np.set_printoptions(precision=3)
+        print("prob_y_if_x=", prob_y_if_x)
         simp.report()
 
         print()
-        prob_a_if_b = np.array([[zeroish, zeroish], [oneish, oneish]])
-        simp = SIMPLE_INFO(prob_a_if_b, pb)
-        print("prob_a_if_b=", prob_a_if_b)
+        prob_y_if_x = np.array([[oneish, oneish], [zeroish, zeroish]])
+        simp = SIMPLE_INFO(prob_y_if_x, px)
+        print("prob_y_if_x=", prob_y_if_x)
+        simp.report()
+
+
+        print()
+        prob_y_if_x = np.array([[zeroish, zeroish], [oneish, oneish]])
+        simp = SIMPLE_INFO(prob_y_if_x, px)
+        print("prob_y_if_x=", prob_y_if_x)
         simp.report()
 
         print()
-        prob_a_if_b = np.array([[.5, .5], [.5, .5]])
-        simp = SIMPLE_INFO(prob_a_if_b, pb)
-        print("prob_a_if_b=", prob_a_if_b)
+        prob_y_if_x = np.array([[.5, .5], [.5, .5]])
+        simp = SIMPLE_INFO(prob_y_if_x, px)
+        print("prob_y_if_x=", prob_y_if_x)
         simp.report()
-    main()
+        print(f"ln(2)={np.log(2):.4}")
+
+        print()
+        prob_y_if_x = np.array([[.3, .1], [.7, .9]])
+        simp = SIMPLE_INFO(prob_y_if_x, px)
+        print("prob_y_if_x=", prob_y_if_x)
+        simp.report()
+        print("---------------------------------")
+    main([.3, .7])
+
+    main([.5, .5])
+
+    main([oneish, zeroish])
+
+    main([zeroish, oneish])
