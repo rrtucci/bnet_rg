@@ -108,7 +108,7 @@ class Net:
             # print("mnk", y_nd.probs[0], y_nd.probs[1], mag)
         return mag / NUM_DNODES
 
-    def get_av_cond_info_and_entropy(self):
+    def get_av_entropy_and_cond_info(self):
         sum_cond_info=0
         sum_ent = 0
         for y_nd in self.y_nodes:
