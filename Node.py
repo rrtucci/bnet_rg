@@ -44,7 +44,8 @@ class Node:
         id_num: int
         type: str
         p0: float|None
-            self.probs=[p0, 1-p0] on first iteration only. self.probs
+            P(S_i^X=-1)=p0, self.probs=[p0, 1-p0] on first iteration only.
+            self.probs
             refreshed with each iteration
         """
         self.id_num = id_num

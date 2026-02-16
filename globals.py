@@ -1,5 +1,7 @@
 import numpy as np
 
+# DNODE=dipole node, ith dnode is (S_i^X, S_i^Y)
+
 DGRAPH_NUM_COLS = 5
 DGRAPH_NUM_ROWS = 5
 NUM_DNODES = DGRAPH_NUM_COLS * DGRAPH_NUM_ROWS

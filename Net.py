@@ -14,14 +14,27 @@ class Net:
     Attributes
     ----------
     av_eff: float
+        average efficiency (1/NUM_DNODES)\sum_i epsilon(S_i^Y|S_i^X)
     beta: float
+        1/T, inverse temperature
     cpt: Cond_Prob
     h: float
+        magnetic field, coupling, energy contribution is $-h* S_i^Y$, h=0 in
+        this study
+    jj: float
+        coupling constant, energy contribution is
+        $-jj* S_i^Y(S_a^X + S_b^X + S_c^X + S_d^X)$
     lam: float
+        coupling constant, energy contribution is $-lam* S_i^X S_i^Y$. lam=0
+        in this study
     mag: float
+        magnetization (1/NUM_DNODES)\sum_i S_i^Y
     num_iter: int
+        number of  iterations
     x_nodes: list[Node]
+        list of X nodes S_i^X, i=1,2, ..., NUM_DNODES
     y_nodes: list[Node]
+        list of X nodes S_i^X, i=1,2, ..., NUM_DNODES
     """
     def __init__(self, beta, jj, h=0, lam=0,
                  num_iter=1, p0=.2, do_reversing=False):
@@ -35,7 +48,11 @@ class Net:
         lam: float
         num_iter: int
         p0: float|None
+            P(S_i^X=-1)=p0, P(S_i^X=+1)=1-p0, for all i, on first iteration
+            only. P(S_i^X) refreshed with each iteration
         do_reversing: bool
+            True iff update the S_i^X nodes in order of decreasing (reversed)
+            i. False iff update in order of increasing i
         """
         self.beta = beta
         self.jj = jj
@@ -67,6 +84,8 @@ class Net:
 
     def get_nd_from_id(self, id_num, type):
         """
+        This method returns an object of class Node, given the id_num and
+        type of Node.
 
         Parameters
         ----------
@@ -105,6 +124,8 @@ class Net:
 
     def calc_y_node_params(self, reversed_sweep=False):
         """
+        For each node, this method calculates and stores values of various
+        attributes
 
         Parameters
         ----------
@@ -166,6 +187,9 @@ class Net:
 
     def get_mag(self):
         """
+        This method returns the magnetization of the lattice
+
+        (1/NUM_DNODES)\sum_i S_i^Y
 
         Returns
         -------
@@ -180,10 +204,16 @@ class Net:
 
     def get_av_entropy_and_cond_info(self):
         """
+        This method returns a pair
+
+        (average entropy, average conditional info)
+
+        The entropy and conditional info for each Y node S_i^Y is  averaged
+        over all the dipole nodes (dnode). ith dnode is (S_i^X, S_i^Y)
 
         Returns
         -------
-        list[float]
+        tuple[float]
         """
         sum_cond_info = 0
         sum_ent = 0
@@ -194,10 +224,19 @@ class Net:
 
     def get_av_eff2(self):
         """
+        This method returns a tuple
+
+        (av_eff, no_undef_eff)
+
+        av_eff is the average efficiency, averaged over all nodes whose
+        efficiency of is well defined as a float.
+
+        no_undef_eff is a Boolean flag that is False iff there exists one
+        node whose efficiency == None
 
         Returns
         -------
-        float
+        (float, bool)
 
         """
         sum_eff = 0
@@ -217,6 +256,15 @@ class Net:
 
     def load_x_node_probs(self):
         """
+        This method transfers the probability distribution
+
+        P(S_i^Y) to P(S_i^X) for each dnode i
+
+        x_nd.probs = y_nd.probs where x_nd is S_i^X and y_nd is S_i^Y
+
+        By doing sso, this method advances the dynamical bnet from the time
+        slice time t to the time slice t+1
+
 
         Returns
         -------
@@ -232,6 +280,8 @@ class Net:
 
     def write_dot_file(self, fname):
         """
+        This method writes a graphviz dot file at fname. This dot file is
+        later used by method plot_lattice(fname) to draw the lattice
 
         Parameters
         ----------
@@ -265,6 +315,8 @@ class Net:
 
     def plot_lattice(self, dot_file):
         """
+        This method plots the lattice using the graphviz neato engine and the
+        dot file `dot_file`
 
         Parameters
         ----------
