@@ -7,14 +7,14 @@ class Node:
 
     Attributes
     ----------
-    cond_info:
-    efficiency:
-    entropy:
-    id_num:
-    mutual_info:
-    nearest_nei:
-    probs:
-    type:
+    cond_info: float
+    efficiency: float
+    entropy: float
+    id_num: int
+    mutual_info: float
+    nearest_nei: list[int]
+    probs: list[float]
+    type: str
 
 
     """
@@ -23,9 +23,9 @@ class Node:
 
         Parameters
         ----------
-        id_num
-        type
-        p0
+        id_num: int
+        type: str
+        p0: float|None
         """
         self.id_num = id_num
         self.type = type
@@ -44,6 +44,7 @@ class Node:
 
         Returns
         -------
+        None
 
         """
         print("id_num=", self.id_num)
@@ -60,6 +61,7 @@ class Node:
 
         Returns
         -------
+        nearest_nei: list[int]
 
         """
         nearest_nei = [self.id_num + 1, self.id_num - 1,
@@ -82,6 +84,7 @@ class Node:
 
         Returns
         -------
+        None
 
         """
         if self.entropy <1e-9 and self.cond_info< 1e-9:
@@ -94,6 +97,7 @@ class Node:
 
         Returns
         -------
+        int
 
         """
         return choices([-1, 1], self.probs)[0]

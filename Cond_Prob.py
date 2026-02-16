@@ -6,10 +6,10 @@ class Cond_Prob:
 
     Attributes
     ----------
-    beta:
-    h:
-    jj:
-    lam:
+    beta: float
+    h: float
+    jj: float
+    lam: float
 
     """
     def __init__(self, beta, jj, h, lam):
@@ -17,10 +17,10 @@ class Cond_Prob:
 
         Parameters
         ----------
-        beta
-        jj
-        h
-        lam
+        beta: float
+        jj: float
+        h: float
+        lam: float
         """
         self.beta = beta
         self.jj = jj
@@ -32,11 +32,13 @@ class Cond_Prob:
 
         Parameters
         ----------
-        abcd_states
-        x_state
+        abcd_states: list[int]
+        x_state: int
 
         Returns
         -------
+        [cond_prob_m, cond_prob_p, zz]: list[float]
+
 
         """
         assert set(abcd_states).issubset(set([-1, 1])), \

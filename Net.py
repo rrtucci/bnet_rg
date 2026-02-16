@@ -13,19 +13,15 @@ class Net:
 
     Attributes
     ----------
-    av_eff:
-    beta:
-    cpt:
-    h:
-    lam:
-    mag:
-    num_iter:
-    x_nodes:
-    y_nodes:
-
-
-
-
+    av_eff: float
+    beta: float
+    cpt: Cond_Prob
+    h: float
+    lam: float
+    mag: float
+    num_iter: int
+    x_nodes: list[Node]
+    y_nodes: list[Node]
     """
     def __init__(self, beta, jj, h=0, lam=0,
                  num_iter=1, p0=.2, do_reversing=False):
@@ -33,13 +29,13 @@ class Net:
 
         Parameters
         ----------
-        beta
-        jj
-        h
-        lam
-        num_iter
-        p0
-        do_reversing
+        beta: float
+        jj: float
+        h: float
+        lam: float
+        num_iter: int
+        p0: float
+        do_reversing: bool
         """
         self.beta = beta
         self.jj = jj
@@ -71,11 +67,12 @@ class Net:
 
         Parameters
         ----------
-        id_num
-        type
+        id_num: int
+        type: str
 
         Returns
         -------
+        Node
 
         """
         assert id_num - 1 in range(NUM_DNODES)
@@ -90,10 +87,11 @@ class Net:
 
         Parameters
         ----------
-        p0
+        p0: float
 
         Returns
         -------
+        None
 
         """
         for nd_id in range(1, NUM_DNODES + 1):
@@ -107,10 +105,11 @@ class Net:
 
         Parameters
         ----------
-        reversed_sweep
+        reversed_sweep: Bool
 
         Returns
         -------
+        None
 
         """
         if not reversed_sweep:
@@ -167,6 +166,7 @@ class Net:
 
         Returns
         -------
+        float
 
         """
         mag = 0
@@ -180,7 +180,7 @@ class Net:
 
         Returns
         -------
-
+        list[float]
         """
         sum_cond_info = 0
         sum_ent = 0
@@ -194,6 +194,7 @@ class Net:
 
         Returns
         -------
+        float
 
         """
         sum_eff = 0
@@ -216,6 +217,7 @@ class Net:
 
         Returns
         -------
+        None
 
         """
         # print("mnk-----------------")
@@ -230,10 +232,11 @@ class Net:
 
         Parameters
         ----------
-        fname
+        fname: str
 
         Returns
         -------
+        None
 
         """
         with open(fname, "w") as f:
@@ -262,10 +265,11 @@ class Net:
 
         Parameters
         ----------
-        dot_file
+        dot_file: str
 
         Returns
         -------
+        None
 
         """
         self.write_dot_file(dot_file)

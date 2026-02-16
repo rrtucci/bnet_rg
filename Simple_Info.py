@@ -4,9 +4,9 @@ class Simple_Info:
 
     Attributes
     ----------
-    prob_y_if_x:
-    px:
-    py:
+    prob_y_if_x: np.array
+    px: list[float]
+    py: list[float]
 
 
     """
@@ -16,8 +16,8 @@ class Simple_Info:
 
         Parameters
         ----------
-        prob_y_if_x
-        px
+        prob_y_if_x: np.array
+        px: list[float]
         """
         self.prob_y_if_x = prob_y_if_x
         self.px = px
@@ -29,6 +29,8 @@ class Simple_Info:
 
         Returns
         -------
+        [py0, py1]: list[float]
+
 
         """
         py0 =0
@@ -43,6 +45,7 @@ class Simple_Info:
 
         Returns
         -------
+        mi: float
 
         """
         mi=0
@@ -58,10 +61,11 @@ class Simple_Info:
 
         Parameters
         ----------
-        probs
+        probs: list[float]
 
         Returns
         -------
+        ent: float
 
         """
         ent = 0
@@ -74,6 +78,7 @@ class Simple_Info:
 
         Returns
         -------
+        ci: float
 
         """
         ci=0
@@ -89,6 +94,7 @@ class Simple_Info:
 
         Returns
         -------
+        None
 
         """
         mi = self.mutual_info()
