@@ -34,7 +34,7 @@ class Net:
         h: float
         lam: float
         num_iter: int
-        p0: float
+        p0: float|None
         do_reversing: bool
         """
         self.beta = beta
@@ -54,12 +54,15 @@ class Net:
                 reversed_sweep = False
             self.calc_y_node_params(reversed_sweep)
             self.mag = self.get_mag()
-            self.av_eff = self.get_av_eff()
-            if self.av_eff[1]:
-                av_eff_str = f"{self.av_eff[0]:.5f}"
+            self.av_eff, self.av_eff_flag = self.get_av_eff2()
+            if self.av_eff_flag:
+                av_eff_str = f"{self.av_eff:.5f}"
             else:
                 av_eff_str = "undef"
             print(f"{i + 1}, mag={self.mag:.5f}, av_eff={av_eff_str}")
+            if av_eff_str == "undef":
+                break
+                
             self.load_x_node_probs()
 
     def get_nd_from_id(self, id_num, type):
@@ -87,7 +90,7 @@ class Net:
 
         Parameters
         ----------
-        p0: float
+        p0: float|None
 
         Returns
         -------
@@ -189,7 +192,7 @@ class Net:
             sum_ent += y_nd.entropy
         return sum_ent / NUM_DNODES, sum_cond_info / NUM_DNODES
 
-    def get_av_eff(self):
+    def get_av_eff2(self):
         """
 
         Returns
@@ -277,8 +280,8 @@ class Net:
             p0_str = f"{self.p0:.3f}"
         else:
             p0_str = "random"
-        if self.av_eff[1]:
-            av_eff_str = f"{self.av_eff[0]:.3f}"
+        if self.av_eff_flag:
+            av_eff_str = f"{self.av_eff:.3f}"
         else:
             av_eff_str = "undefined"
         caption = f"beta={self.beta:.3f}, jj={self.jj:.3f}, h={self.h:.3f}, " \

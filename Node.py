@@ -4,28 +4,48 @@ from globals import *
 
 class Node:
     """
+    This class stores all the attributes of a node. The nodes are
+
+    S^X_i for i=1,2, ..., NUM_DNODES
+
+    and
+
+    S^Y_i for i=1,2, ..., NUM_DNODES
+
 
     Attributes
     ----------
     cond_info: float
-    efficiency: float
+       the conditional information H(S_i^Y|S_i^X) assuming this is node S_i^Y
+    efficiency: float|None
+        the efficiency epsilon(S_i^Y|S_i^X) = H(S_i^Y:S_i^X)/H(S_i^Y) assuming
+        this is node S_i^Y
     entropy: float
+        the entropy H(S_i^Y) assuming this is node S_i^Y
     id_num: int
+        the i int assuming this is node S_i^Y or S_i^X
     mutual_info: float
+        the mutual information H(S_i^Y:S_i^X) assuming this is node S_i^Y
     nearest_nei: list[int]
+        list of id_num for the nearest neighbors assuming this is node S_i^Y
     probs: list[float]
+        [P(S_i^Y=-1), P(S_i^Y=+1)] assuming this is node S_i^Y
     type: str
+        either "X" or "Y", respectively, assuming this is node S_i^X or S_i^Y
 
 
     """
     def __init__(self, id_num, type, p0=None):
         """
+        constructor
 
         Parameters
         ----------
         id_num: int
         type: str
         p0: float|None
+            self.probs=[p0, 1-p0] on first iteration only. self.probs
+            refreshed with each iteration
         """
         self.id_num = id_num
         self.type = type
@@ -41,6 +61,7 @@ class Node:
 
     def describe_self(self):
         """
+        This method prints a description of all the attributes of self
 
         Returns
         -------
@@ -58,6 +79,11 @@ class Node:
 
     def get_nearest_nei(self):
         """
+        This method returns a list of the nearest neighbor id_num for self,
+        assuming a rectangular lattice with DGRAPH_NUM_COLS columns and
+        DGRAPH_NUM_ROWS. Internal nodes have 4 nn, corner nodes have 2 nn,
+        and boundary nodes that are not corners have 2 nn. Nodes S_i^X and
+        S_i^Y are at the same site id_num of the lattice
 
         Returns
         -------
@@ -81,6 +107,12 @@ class Node:
 
     def set_efficiency(self):
         """
+        This method simply sets
+
+        self.efficiency = self.mutual_info / self.entropy
+
+        but only if we don't have 0/0. In the latter case, it sets
+        self.efficiency to None
 
         Returns
         -------
@@ -94,6 +126,7 @@ class Node:
 
     def sample(self):
         """
+        This method returns either -1 or +1, at random, using self.probs
 
         Returns
         -------
