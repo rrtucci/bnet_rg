@@ -1,18 +1,28 @@
 import numpy as np
 class Simple_Info:
     """
-
+    This is a stand alone class for calculating various information theory 
+    metrics for the trivial case of a distribution P(x, y) where x and y \in 
+    {0, 1}
+    
+    P(x, y) = P(y|x) P(x)
+    
     Attributes
     ----------
     prob_y_if_x: np.array
+        P(y|x) specified as an array with column label y and row label x
     px: list[float]
+        P(x) specified as a list [P(x=0), P(x=1)]
     py: list[float]
+        P(y) specified as a list [P(y=0), P(y=1)]
+        
 
 
     """
 
     def __init__(self, prob_y_if_x, px):
         """
+        constructor
 
         Parameters
         ----------
@@ -26,10 +36,11 @@ class Simple_Info:
 
     def get_py(self):
         """
+        This method returns P(y) specified as a list [P(y=0), P(y=1)]
 
         Returns
         -------
-        [py0, py1]: list[float]
+        list[float]
 
 
         """
@@ -42,6 +53,7 @@ class Simple_Info:
 
     def mutual_info(self):
         """
+        This method returns the mutual information H(y:x)
 
         Returns
         -------
@@ -58,6 +70,7 @@ class Simple_Info:
     @staticmethod
     def entropy_coin_toss(probs):
         """
+        This method returns the entropy for probs = [P(a=0), P(a=1)]
 
         Parameters
         ----------
@@ -75,6 +88,7 @@ class Simple_Info:
 
     def cond_info_y_if_x(self):
         """
+        This method returns the conditional information H(y|x)
 
         Returns
         -------
@@ -91,6 +105,8 @@ class Simple_Info:
 
     def report(self):
         """
+        This method prints a report with the values it is inputted and the 
+        values it calculates.
 
         Returns
         -------
