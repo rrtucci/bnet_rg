@@ -16,22 +16,22 @@ class Node:
     Attributes
     ----------
     cond_info: float
-       the conditional information H(S_i^Y|S_i^X) assuming this is node S_i^Y
+       the conditional information H(S_i^Y|S_i^X) when this is node S_i^Y
     efficiency: float|None
-        the efficiency epsilon(S_i^Y|S_i^X) = H(S_i^Y:S_i^X)/H(S_i^Y) assuming
+        the efficiency epsilon(S_i^Y|S_i^X) = H(S_i^Y:S_i^X)/H(S_i^Y) when
         this is node S_i^Y
     entropy: float
-        the entropy H(S_i^Y) assuming this is node S_i^Y
+        the entropy H(S_i^Y) when this is node S_i^Y
     id_num: int
-        the i int assuming this is node S_i^Y or S_i^X
+        the i int when this is node S_i^Y or S_i^X
     mutual_info: float
-        the mutual information H(S_i^Y:S_i^X) assuming this is node S_i^Y
+        the mutual information H(S_i^Y:S_i^X) when this is node S_i^Y
     nearest_nei: list[int]
-        list of id_num for the nearest neighbors assuming this is node S_i^Y
+        list of id_num for the nearest neighbors when this is node S_i^Y
     probs: list[float]
-        [P(S_i^Y=-1), P(S_i^Y=+1)] assuming this is node S_i^Y
+        [P(S_i^Y=-1), P(S_i^Y=+1)] when this is node S_i^Y
     type: str
-        either "X" or "Y", respectively, assuming this is node S_i^X or S_i^Y
+        either "X" or "Y", respectively, when this is node S_i^X or S_i^Y
 
 
     """
@@ -45,8 +45,7 @@ class Node:
         type: str
         p0: float|None
             P(S_i^X=-1)=p0, self.probs=[p0, 1-p0] on first iteration only.
-            self.probs
-            refreshed with each iteration
+            self.probs refreshed with each iteration
         """
         self.id_num = id_num
         self.type = type
@@ -80,11 +79,11 @@ class Node:
 
     def get_nearest_nei(self):
         """
-        This method returns a list of the nearest neighbor id_num for self,
-        assuming a rectangular lattice with DGRAPH_NUM_COLS columns and
-        DGRAPH_NUM_ROWS. Internal nodes have 4 nn, corner nodes have 2 nn,
-        and boundary nodes that are not corners have 2 nn. Nodes S_i^X and
-        S_i^Y are at the same site id_num of the lattice
+        This method returns a list of the nearest neighbor (nn) id_num for
+        self, for a rectangular lattice with DGRAPH_NUM_COLS columns and
+        DGRAPH_NUM_ROWS rows. Internal nodes have 4 nn, corner nodes have 2
+        nn, and boundary nodes that are not corners have 2 nn. Nodes S_i^X
+        and S_i^Y are at the same site id_num of the lattice
 
         Returns
         -------
@@ -132,6 +131,7 @@ class Node:
         Returns
         -------
         int
+            either -1 or +1
 
         """
         return choices([-1, 1], self.probs)[0]

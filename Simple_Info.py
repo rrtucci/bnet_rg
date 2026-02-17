@@ -1,4 +1,6 @@
 import numpy as np
+
+
 class Simple_Info:
     """
     This is a stand alone class for calculating various information theory 
@@ -42,7 +44,6 @@ class Simple_Info:
         -------
         list[float]
 
-
         """
         py0 =0
         py1 = 0
@@ -70,7 +71,7 @@ class Simple_Info:
     @staticmethod
     def entropy_coin_toss(probs):
         """
-        This method returns the entropy for probs = [P(a=0), P(a=1)]
+        This static method returns the entropy for probs = [P(a=0), P(a=1)]
 
         Parameters
         ----------
@@ -105,7 +106,7 @@ class Simple_Info:
 
     def report(self):
         """
-        This method prints a report with the values it is inputted and the 
+        This method prints a report with the values it is given and the
         values it calculates.
 
         Returns

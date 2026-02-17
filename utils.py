@@ -1,16 +1,19 @@
 import numpy as np
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
+
 
 def coin_toss_entropy(prob):
     """
+    This method calculates the entropy for a binary probability distribution
+    [P(x=0), P(x=1)]
 
     Parameters
     ----------
-    prob
+    prob: float
+        P(x=0) or P(x=1) (the same for both)
 
     Returns
     -------
+    float
 
     """
     if prob < 1e-10 or prob> 1-1e-10:

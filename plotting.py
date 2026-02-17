@@ -11,11 +11,13 @@ from matplotlib.gridspec import GridSpec
 
 def efficiency_to_hex(e, cmap_name="viridis"):
     """
-    Map efficiency e in [0,1] to a hex color using a Matplotlib colormap.
+    This method maps an efficiency e in [0,1] to a hex color using a
+    Matplotlib colormap.
+
     Parameters
     ----------
-    e:
-    cmap_name:
+    e: float
+    cmap_name: str
     """
     cmap = cm.get_cmap(cmap_name)
     rgba = cmap(e)  # (r, jj, b, a) in [0,1]
@@ -32,17 +34,21 @@ def plot_dot_with_colorbar(
         colorbar_label="Efficiency",
         engine="neato"):
     """
+    This method plots a dot file using graphviz. The plot includes a color bar
+    on the right side
 
     Parameters
     ----------
-    dot_file
-    caption
-    cmap_name
-    vmin
-    vmax
-    figsize
-    colorbar_label
-    engine
+    dot_file: str
+        only dot_file and caption is changed in this study
+    caption: str
+        only dot_file and caption is changed in this study
+    cmap_name: str
+    vmin: float
+    vmax: float
+    figsize: tuple[float]
+    colorbar_label: str
+    engine: str
 
     Returns
     -------
@@ -88,13 +94,17 @@ def plot_dot_with_colorbar(
 
 def plot_parametric_curve(param_to_x_y):
     """
+    This method plots points in the (x,y) plane. Each point has a parameter
+    param (like time)
 
     Parameters
     ----------
-    param_to_x_y
+    param_to_x_y: dict[float, tuple(float, float)]
+        dictionary mapping a param to an (x,y) tuple.
 
     Returns
     -------
+    None
 
     """
     # Sort dictionary by parameter p0

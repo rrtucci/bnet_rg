@@ -18,9 +18,10 @@ class Net:
     beta: float
         1/T, inverse temperature
     cpt: Cond_Prob
+        object of class Cond_Prob
     h: float
-        magnetic field, coupling, energy contribution is $-h* S_i^Y$, h=0 in
-        this study
+        magnetic field, coupling constant, energy contribution is $-h* S_i^Y$,
+        h=0 in this study
     jj: float
         coupling constant, energy contribution is
         $-jj* S_i^Y(S_a^X + S_b^X + S_c^X + S_d^X)$
@@ -34,8 +35,9 @@ class Net:
     x_nodes: list[Node]
         list of X nodes S_i^X, i=1,2, ..., NUM_DNODES
     y_nodes: list[Node]
-        list of X nodes S_i^X, i=1,2, ..., NUM_DNODES
+        list of Y nodes S_i^Y, i=1,2, ..., NUM_DNODES
     """
+
     def __init__(self, beta, jj, h=0, lam=0,
                  num_iter=1, p0=.2, do_reversing=False):
         """
@@ -51,8 +53,8 @@ class Net:
             P(S_i^X=-1)=p0, P(S_i^X=+1)=1-p0, for all i, on first iteration
             only. P(S_i^X) refreshed with each iteration
         do_reversing: bool
-            True iff update the S_i^X nodes in order of decreasing (reversed)
-            i. False iff update in order of increasing i
+            False iff update S_i^X nodes in order of increasing i. True iff
+            update the nodes in order of decreasing (reversed) i.
         """
         self.beta = beta
         self.jj = jj
@@ -79,7 +81,7 @@ class Net:
             print(f"{i + 1}, mag={self.mag:.5f}, av_eff={av_eff_str}")
             if av_eff_str == "undef":
                 break
-                
+
             self.load_x_node_probs()
 
     def get_nd_from_id(self, id_num, type):
@@ -106,6 +108,8 @@ class Net:
 
     def create_nodes(self, p0):
         """
+        This method creates separate lists self.x_nodes and self.y_nodes
+        of Node objects.
 
         Parameters
         ----------
@@ -208,8 +212,8 @@ class Net:
 
         (average entropy, average conditional info)
 
-        The entropy and conditional info for each Y node S_i^Y is  averaged
-        over all the dipole nodes (dnode). ith dnode is (S_i^X, S_i^Y)
+        The entropy and conditional info for each Y node S_i^Y is averaged
+        over all the dnodes (dipole nodes). ith dnode is (S_i^X, S_i^Y)
 
         Returns
         -------
@@ -260,9 +264,11 @@ class Net:
 
         P(S_i^Y) to P(S_i^X) for each dnode i
 
-        x_nd.probs = y_nd.probs where x_nd is S_i^X and y_nd is S_i^Y
+        x_nd.probs = y_nd.probs
 
-        By doing sso, this method advances the dynamical bnet from the time
+        where x_nd is S_i^X and y_nd is S_i^Y
+
+        By doing so, this method advances the dynamical bnet from the time
         slice time t to the time slice t+1
 
 
